@@ -1,0 +1,8 @@
+[package]
+name = "redis-import"
+version = "0.1.0"
+authors = ["kohtoa15 <kohtoa15@htlkaindorf.at>"]
+edition = "2018"
+
+[dependencies]
+redis = "*"
