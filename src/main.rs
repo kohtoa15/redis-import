@@ -60,7 +60,7 @@ fn main() {
         }
         return;
     }
-    
+
     // Debug output of matched params
     if let Some(_x) = params.get(&str_verbose) {
         println!("Params:");
@@ -71,17 +71,26 @@ fn main() {
 
     // Assign Program parameters
     let filename = set_data_or_input(&params, &str_file, "Enter filepath: ");
-    let template = set_data_or_input(&params, &str_template, "Enter template filepath: ");
+    let mut template = set_data_or_input(&params, &str_template, "Enter template filepath: ");
     let name = set_data_or_input(&params, &str_name, "Enter collection name: ");
     let ip_addr = set_data_or_input(&params, &str_ip, "Enter server ip: ");
     let port = set_data(&params, &str_port).map(|s| s.parse::<u16>().expect("Invalid port number!"));
     let dbname = set_data(&params, &str_dbname);
     let id_key = set_data_or_input(&params, &str_identifier, "Enter identifying key: ");
 
+    // Check if template is not additional, but header line in the file proper
+    let header = match template.as_str() {
+        "header" => true,
+        _ => false,
+    };
+    if header {
+        template = filename.clone();
+    }
+
     // Map template keys to file data
     let mut mapped_data: Vec<HashMap<String, String>> = Vec::new();
     {
-        let data = importcsv::read_csv(filename.as_str()).expect("Could not read import data file!");
+        let data = importcsv::read_csv(filename.as_str(), header).expect("Could not read import data file!");
         let mapping = importcsv::read_template(template.as_str()).expect("Could not read template file!");
 
         for row in &data {

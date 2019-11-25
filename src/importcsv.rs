@@ -3,7 +3,7 @@ use std::{
     fs::File,
 };
 
-pub fn read_csv(filepath: &str) -> Result< Vec<Vec<String>>, io::Error> {
+pub fn read_csv(filepath: &str, mut header: bool) -> Result< Vec<Vec<String>>, io::Error> {
     let file = File::open(filepath)?;
     let mut buf_reader = BufReader::new(file);
 
@@ -14,8 +14,14 @@ pub fn read_csv(filepath: &str) -> Result< Vec<Vec<String>>, io::Error> {
             Err(_) => break,
             Ok(length) => {
                 if length != 0 {
-                    let line = line.trim();
-                    ret.push( line.split(";").map(|s| String::from(s)).collect::<Vec<String>>() );
+                    // Skipping first line if header line is configured
+                    if header {
+                        header = false;
+                        continue;
+                    } else {
+                        let line = line.trim();
+                        ret.push( line.split(";").map(|s| String::from(s)).collect::<Vec<String>>() );
+                    }
                 } else {
                     break;
                 }
@@ -27,6 +33,6 @@ pub fn read_csv(filepath: &str) -> Result< Vec<Vec<String>>, io::Error> {
 }
 
 pub fn read_template(file: &str) -> Result<Vec<String>, io::Error> {
-    let data = read_csv(file)?;
+    let data = read_csv(file, false)?;
     data.into_iter().next().ok_or(io::Error::from(io::ErrorKind::UnexpectedEof))
 }
